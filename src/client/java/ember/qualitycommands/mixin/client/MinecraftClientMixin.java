@@ -41,20 +41,14 @@ import ember.qualitycommands.util.NbtComponentAccessor;
 import net.minecraft.util.Identifier;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
-
-@Mixin(PlayerEntityRenderer.class)
-public class PlayerEntityRendererMixin{
-    @Inject(method = "updateRenderState", at = @At("TAIL"))
-	private void getAndUpdateRenderStateModifier(AbstractClientPlayerEntity entity,PlayerEntityRenderState playerEntityRenderState, float tickProgress,CallbackInfo info) {
-		PlayerEntityRenderState entityRenderState=(PlayerEntityRenderState)playerEntityRenderState;
-        if(((NbtComponentAccessor)(Object)((EntityAccessor)entity).getCustomData()).getNbt().getString("model_override").isPresent()){
-            if(((NbtComponentAccessor)(Object)((EntityAccessor)entity).getCustomData()).getNbt().getString("model_override").get().length()!=0){
-                if(Registries.ENTITY_TYPE.containsId(Identifier.of(((NbtComponentAccessor)(Object)((EntityAccessor)entity).getCustomData()).getNbt().getString("model_override").get()))){
-                    EntityType<?> newType=Registries.ENTITY_TYPE.get(Identifier.of(((NbtComponentAccessor)(Object)((EntityAccessor)entity).getCustomData()).getNbt().getString("model_override").get()));
-                    playerEntityRenderState.entityType=newType;
-                }
-                
-            }
-        }
-	}
+import net.minecraft.client.MinecraftClient;
+import ember.qualitycommands.util.MinecraftClientAccessor;
+import net.minecraft.client.render.entity.EntityRenderManager;
+@Mixin(MinecraftClient.class)
+public class MinecraftClientMixin implements MinecraftClientAccessor{
+    @Shadow
+    public EntityRenderManager entityRenderManager;
+    public EntityRenderManager getEntityRenderManager(){
+        return this.entityRenderManager;
+    }
 }

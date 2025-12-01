@@ -59,6 +59,11 @@ import com.llamalad7.mixinextras.sugar.Local;
 import ember.qualitycommands.util.NbtComponentAccessor;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.util.math.Box;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnReason;
+import net.minecraft.util.Identifier;
 @Mixin(Entity.class)
 public class EntityMixin implements ember.qualitycommands.util.EntityAccessor{
     @Shadow
@@ -155,5 +160,59 @@ public class EntityMixin implements ember.qualitycommands.util.EntityAccessor{
         return this.customData;
     };
     
+    @Nullable
+    public Entity currentIdentity=null;
+    public Entity getCurrentIdentity(){
+        return this.currentIdentity;
+    }
+    public void setCurrentIdentity(Entity e){
+        this.currentIdentity=e;
+    }
+    public void setCurrentIdentity(String id, NbtCompound data){
+        this.setCurrentIdentity(id);
+        //this.currentIdentity=e;
+    }
+    public void setCurrentIdentity(String id){
+            EntityType<?> newType=Registries.ENTITY_TYPE.get(Identifier.of(((NbtComponentAccessor)(Object)this.getCustomData()).getNbt().getString("model_override").get()));
+            Vec3d pos=new Vec3d(0,0,0);
+            BlockPos blockPos = BlockPos.ofFloored(pos);
+            /*if (!World.isValid(blockPos)) {
+                throw INVALID_POSITION_EXCEPTION.create();
+            }*//* else if (source.getWorld().getDifficulty() == Difficulty.PEACEFUL && !entityType.isAllowedInPeaceful()) {
+                throw FAILED_PEACEFUL_EXCEPTION.create();
+            }*/ /*else*/ {
+                NbtCompound nbtCompound = new NbtCompound().copy();
+                nbtCompound.putString("id", id);
+                World serverWorld = (World)((Entity)(Object)this).getEntityWorld();
+                Entity entity = EntityType.loadEntityWithPassengers(nbtCompound, serverWorld, SpawnReason.COMMAND, entityx -> {
+                    entityx.refreshPositionAndAngles(pos.x, pos.y, pos.z, entityx.getYaw(), entityx.getPitch());
+                    return entityx;
+                });
+                if (entity == null) {
+                    return;
+                    //throw FAILED_EXCEPTION.create();
+                } else {
+                    /*if (initialize && entity instanceof MobEntity mobEntity) {
+                        mobEntity.initialize(source.getWorld(), source.getWorld().getLocalDifficulty(entity.getBlockPos()), SpawnReason.COMMAND, null);
+                    }*/
+
+
+                        this.currentIdentity=entity;
+                    
+                }
+            }
+        
+        
+    }
+    @Shadow
+    protected boolean touchingWater;
+    @Shadow
+    @Nullable private Entity vehicle;
+    public void setVehicle(Entity vehicle){
+        this.vehicle=vehicle;
+    }
+	public void setTouchingWater(boolean isTouchingWater){
+        this.touchingWater=isTouchingWater;
+    }
 }
 

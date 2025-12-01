@@ -59,7 +59,11 @@ public class QualityCommandsClient implements ClientModInitializer{
             NbtComponent n=((EntityAccessor)entity).getCustomData();
             for (ember.qualitycommands.packets.CustomEntityDataS2CPacket.EntryString entry : packet.entries()) {
                 ((NbtComponentAccessor)(Object)n).getNbt().putString(entry.key(),entry.value());
+                if(entry.key().matches("model_override")){
+                    ((EntityAccessor)entity).setCurrentIdentity(entry.value());
+                }
             }
+            
 		}
 	}
     		// In your client-only initializer method

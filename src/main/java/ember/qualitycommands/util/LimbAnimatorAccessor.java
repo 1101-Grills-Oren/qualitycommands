@@ -62,13 +62,10 @@ import net.minecraft.command.argument.RegistryEntryReferenceArgumentType;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.function.CommandFunctionManager;
 import net.minecraft.nbt.NbtCompound;
-public abstract interface EntityAccessor {
-	public abstract net.minecraft.component.type.NbtComponent getCustomData();
-    public abstract Entity getCurrentIdentity();
-	public abstract void setCurrentIdentity(Entity e);
-    public abstract void setCurrentIdentity(String id, NbtCompound data);
-    public abstract void setCurrentIdentity(String id);
-	public abstract void setVehicle(Entity vehicle);
-	public abstract void setTouchingWater(boolean isTouchingWater);
+public abstract interface LimbAnimatorAccessor {
+	public abstract void setPrevSpeed(float lastSpeed);
+	public abstract void setSpeed(float speed);
+	public abstract float getPrevSpeed();
+	public abstract float getSpeed();
 }
 //execute as @n[type=item] run with d data entity @s Item summon item ~ ~5 ~ {Item:@(d)}
