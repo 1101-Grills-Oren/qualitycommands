@@ -51,7 +51,9 @@ public class QualityCommandsClient implements ClientModInitializer{
             for (ember.qualitycommands.packets.CustomEntityDataS2CPacket.Entry entry : packet.entries()) {
                 ((NbtComponentAccessor)(Object)n).getNbt().putDouble(entry.key(),entry.value());
             }
-		}
+		}else{
+            QualityCommands.LOGGER.info("Entity null.");
+        }
 	}
     public void onUpdateCustomData(CustomEntityStringDataS2CPacketPayload packet) {
 		Entity entity = MinecraftClient.getInstance().world.getEntityById(packet.entityid());
@@ -64,7 +66,9 @@ public class QualityCommandsClient implements ClientModInitializer{
                 }
             }
             
-		}
+		}else{
+            QualityCommands.LOGGER.info("Entity null.");
+        }
 	}
     		// In your client-only initializer method
 		

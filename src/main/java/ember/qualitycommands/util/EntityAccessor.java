@@ -70,5 +70,6 @@ public abstract interface EntityAccessor {
     public abstract void setCurrentIdentity(String id);
 	public abstract void setVehicle(Entity vehicle);
 	public abstract void setTouchingWater(boolean isTouchingWater);
+	public abstract void setLastPosition(Vec3d pos);
 }
 //execute as @n[type=item] run with d data entity @s Item summon item ~ ~5 ~ {Item:@(d)}

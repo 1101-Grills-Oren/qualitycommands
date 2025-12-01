@@ -62,12 +62,14 @@ public class LimbAnimatorMixin implements LimbAnimatorAccessor{
     public void setPrevSpeed(float lastSpeed){
         this.lastSpeed=lastSpeed;
     };
+    @Shadow
 	public void setSpeed(float speed){
         this.speed=speed;
     };
 	public float getPrevSpeed(){
         return lastSpeed;
     };
+    @Shadow
 	public float getSpeed(){
         return speed;
     };

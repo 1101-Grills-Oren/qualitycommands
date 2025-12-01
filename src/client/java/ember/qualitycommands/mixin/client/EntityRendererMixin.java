@@ -46,6 +46,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PhantomEntity;
+import net.minecraft.client.render.entity.state.EntityHitboxAndView;
 @Mixin(EntityRenderer.class)
 public class EntityRendererMixin<T extends Entity, S extends EntityRenderState>{
     @Inject(method = "getAndUpdateRenderState", at = @At("RETURN"), cancellable = true)
@@ -59,9 +60,18 @@ public class EntityRendererMixin<T extends Entity, S extends EntityRenderState>{
                 Entity identity=((EntityAccessor)entity).getCurrentIdentity();
                 EntityRenderer renderer=((MinecraftClientAccessor)MinecraftClient.getInstance()).getEntityRenderManager().getRenderer(identity);
                 EntityRenderer currentRenderer=((MinecraftClientAccessor)MinecraftClient.getInstance()).getEntityRenderManager().getRenderer(entity);
-                entityRenderState=renderer.createRenderState();
+                EntityHitboxAndView oldHitbox=entityRenderState.hitbox;
                 {
             //living only:
+            
+            identity.setPos(
+                ((Entity)entity).getEntityPos().x,
+                ((Entity)entity).getEntityPos().y,
+                ((Entity)entity).getEntityPos().z
+            );
+            ((EntityAccessor)identity).setLastPosition(
+                ((Entity)entity).getLastRenderPos()
+            );
             if((identity instanceof LivingEntity livingIdentity)&&(entity instanceof LivingEntity livingEntity)){
             LimbAnimatorAccessor target = (LimbAnimatorAccessor) livingIdentity.limbAnimator;
             LimbAnimatorAccessor source = (LimbAnimatorAccessor) livingEntity.limbAnimator;
@@ -135,10 +145,11 @@ public class EntityRendererMixin<T extends Entity, S extends EntityRenderState>{
 
 
                 }
-                    
+                entityRenderState=renderer.createRenderState();
 
-                        renderer.updateRenderState(((EntityAccessor)entity).getCurrentIdentity(),entityRenderState,tickProgress);
-                        
+
+                renderer.updateRenderState(((EntityAccessor)entity).getCurrentIdentity(),entityRenderState,tickProgress);
+                entityRenderState.hitbox=oldHitbox;
                         //currentRenderer.updateRenderState(entity,entityRenderState,tickProgress);
                     }
                 }

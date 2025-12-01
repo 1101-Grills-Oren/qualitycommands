@@ -37,7 +37,8 @@
 		"PlayerManagerMixin",
 		"MinecraftServerMixin",
 		"NbtComponentMixin",
-		"LimbAnimatorMixin"
+		"LimbAnimatorMixin",
+		"EntityTrackerEntryMixin"
 		//"RegistryMixin",
 		//"RegistriesMixin",
 		//"SimpleRegistryMixin",

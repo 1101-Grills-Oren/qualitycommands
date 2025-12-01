@@ -68,10 +68,10 @@ public class PlayerManagerMixin{
             ((ember.qualitycommands.util.MinecraftServerAccessor)player.getEntityWorld().getServer()).getCommandFunctionManager().execute(function,player.getEntityWorld().getServer().getCommandSource().withEntity(player).withPosition(player.getEntityPos()).withSilent());
         }
         }
-        while(((NbtComponentAccessor)(Object)((EntityAccessor)player).getCustomData()).getNbt().getKeys().size()!=0){
+        /*while(((NbtComponentAccessor)(Object)((EntityAccessor)player).getCustomData()).getNbt().getKeys().size()!=0){
 
             ((NbtComponentAccessor)(Object)((EntityAccessor)player).getCustomData()).getNbt().remove((String)((NbtComponentAccessor)(Object)((EntityAccessor)player).getCustomData()).getNbt().getKeys().toArray()[0]);
-        }
+        }*/
         
         
     }

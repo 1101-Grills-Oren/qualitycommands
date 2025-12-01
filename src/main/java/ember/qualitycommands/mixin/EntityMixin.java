@@ -134,9 +134,12 @@ public class EntityMixin implements ember.qualitycommands.util.EntityAccessor{
     private void getBoundingBoxModification(CallbackInfo info){
         Box box=((Box)this.boundingBox);
         double old_width=box.maxX-box.minX;
+        double old_height=box.maxY-box.minY;
         double center_x=(box.maxX+box.minX)/2;
         double center_z=(box.maxZ+box.minZ)/2;
+        double center_y=box.minY;
         double new_width=old_width;
+        double new_height=old_height;
 
         if(((NbtComponentAccessor)(Object)this.customData).getNbt().getDouble("width_override").isPresent()){
             if(((NbtComponentAccessor)(Object)this.customData).getNbt().getDouble("width_override").get()>0.0){
@@ -144,10 +147,17 @@ public class EntityMixin implements ember.qualitycommands.util.EntityAccessor{
                 ((NbtComponentAccessor)(Object)this.customData).getNbt().getDouble("width_override").get();
             }
         }
+        if(((NbtComponentAccessor)(Object)this.customData).getNbt().getDouble("height_override").isPresent()){
+            if(((NbtComponentAccessor)(Object)this.customData).getNbt().getDouble("height_override").get()>0.0){
+                new_height=(double)
+                ((NbtComponentAccessor)(Object)this.customData).getNbt().getDouble("height_override").get();
+            }
+        }
         box=box.withMaxX(center_x+new_width/2);
         box=box.withMinX(center_x-new_width/2);
         box=box.withMaxZ(center_z+new_width/2);
         box=box.withMinZ(center_z-new_width/2);
+        box=box.withMaxY(center_y+new_height);
         this.boundingBox=box;
         //info.setReturnValue(box);
     }
@@ -155,7 +165,7 @@ public class EntityMixin implements ember.qualitycommands.util.EntityAccessor{
     public net.minecraft.component.type.NbtComponent getCustomData(){
         if(this.customData==NbtComponent.DEFAULT){
         this.customData= NbtComponent.of(((NbtComponentAccessor)(Object)this.customData).getNbt().copy());
-        QualityCommands.LOGGER.info("Default Custom Data detected.");
+        //QualityCommands.LOGGER.info("Default Custom Data detected.");
         }
         return this.customData;
     };
@@ -214,5 +224,23 @@ public class EntityMixin implements ember.qualitycommands.util.EntityAccessor{
 	public void setTouchingWater(boolean isTouchingWater){
         this.touchingWater=isTouchingWater;
     }
+    @Shadow
+	public double lastX;
+    @Shadow
+	public double lastY;
+    @Shadow
+	public double lastZ;
+    @Shadow
+	public double lastRenderX;
+    @Shadow
+	public double lastRenderY;
+    @Shadow
+	public double lastRenderZ;
+    @Overwrite
+    public void setLastPosition(Vec3d pos){
+		this.lastX = this.lastRenderX = pos.x;
+		this.lastY = this.lastRenderY = pos.y;
+		this.lastZ = this.lastRenderZ = pos.z;
+    };
 }
 
