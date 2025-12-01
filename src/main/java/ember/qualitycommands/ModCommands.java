@@ -7,7 +7,17 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import ember.qualitycommands.commands.TpRelCommand;
-import ember.qualitycommands.commands.SilentFunctionCommand;
+//import ember.qualitycommands.commands.SilentFunctionCommand;
+import ember.qualitycommands.commands.AccelerateCommand;
+import ember.qualitycommands.commands.AccelerateToPosCommand;
+import ember.qualitycommands.commands.AccelerateAltCommand;
+import ember.qualitycommands.commands.ConvertToEntityCommand;
+import ember.qualitycommands.commands.ForLoopCommand;
+import ember.qualitycommands.commands.HealCommand;
+import ember.qualitycommands.commands.RunMultipleCommand;
+import ember.qualitycommands.commands.WithCommand;
+import ember.qualitycommands.commands.AirCommand;
+import ember.qualitycommands.commands.ModifyCustomEntityDataCommand;
 import net.minecraft.server.command.CommandManager;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import java.util.List;
@@ -22,7 +32,17 @@ public class ModCommands{
 	public static void initialize(){
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			TpRelCommand.register(dispatcher);
-			SilentFunctionCommand.register(dispatcher);
+			//SilentFunctionCommand.register(dispatcher);
+			AccelerateCommand.register(dispatcher);
+			AccelerateAltCommand.register(dispatcher);
+			AccelerateToPosCommand.register(dispatcher);
+			ConvertToEntityCommand.register(dispatcher);
+			ForLoopCommand.register(dispatcher);
+			RunMultipleCommand.register(dispatcher);
+			HealCommand.register(dispatcher);
+			AirCommand.register(dispatcher);
+			ModifyCustomEntityDataCommand.register(dispatcher);
+			WithCommand.register(dispatcher,registryAccess);
 		});
 	}
 }

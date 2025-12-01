@@ -1,0 +1,123 @@
+package ember.qualitycommands.mixin;
+import com.google.common.collect.Lists;
+import net.minecraft.util.math.MathHelper;
+import java.util.List;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.LivingEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.SoftOverride;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import net.minecraft.block.AirBlock;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.entity.MovementType;
+import ember.qualitycommands.ModEffects;
+import net.minecraft.item.Items;
+import net.minecraft.item.Item;
+import java.util.Set;
+import net.minecraft.registry.tag.FluidTags;
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.server.command.ExecuteCommand;
+import net.minecraft.command.CommandSource;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.minecraft.server.command.CommandManager;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.item.Item;
+import net.minecraft.item.KnowledgeBookItem;
+import net.minecraft.world.World;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Hand;
+import ember.qualitycommands.QualityCommands;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.SimpleRegistry;
+import com.mojang.serialization.Codec;
+import java.util.IdentityHashMap;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Map.Entry;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.entry.RegistryEntryInfo;
+import net.minecraft.registry.entry.RegistryEntryList;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+@Mixin(Registries.class)
+public class RegistriesMixin{
+    private static int bootstrapattempts=0;
+    /*@Inject(method = "register", at=@At("TAIL"))
+    private static <T> void register(Registry<? super T> registry, String id, T entry,CallbackInfoReturnable info){
+        QualityCommands.LOGGER.info(registry.getKey().getRegistry().toString()+","+registry.getKey().getValue().toString()+","+id.toString());
+    }
+    @Inject(method = "register(Lnet/minecraft/registry/Registry;Lnet/minecraft/util/Identifier;Ljava/lang/Object;)Ljava/lang/Object;", at=@At("TAIL"))
+    private static <V, T extends V> void register(Registry<V> registry, net.minecraft.util.Identifier id, T entry,CallbackInfoReturnable info){
+        QualityCommands.LOGGER.info(registry.getKey().getRegistry().toString()+","+registry.getKey().getValue().toString()+","+id.toString());
+    }*/
+    @Overwrite
+    public static void bootstrap(){
+        if(bootstrapattempts==0){
+            Registries.init();
+            Registries.freezeRegistries();
+            bootstrapattempts=1;
+        }else{
+    		Registries.freezeRegistries();
+    		Registries.validate(Registries.REGISTRIES);
+            bootstrapattempts=2;
+        }
+        //if(id.getRegistry().toString().contains("data"))
+        //QualityCommands.LOGGER.info(id.getRegistry().toString()+","+id.getValue().toString()+","+entry.getClass().getName()+","+entry.toString());
+    }
+    @Overwrite
+    public static void freezeRegistries() {
+        if(bootstrapattempts==0)
+    		Registries.REGISTRIES.freeze();
+
+		for (Registry<?> registry : Registries.REGISTRIES) {
+            if(bootstrapattempts==0){
+                if(registry.getKey().getValue().toString().matches("minecraft:block")==false){
+                    if(((SimpleRegistry)registry).frozen==false){
+                    Registries.resetTagEntries(registry);
+        			registry.freeze();
+                    }
+                }
+            }else if(bootstrapattempts==1){
+                if(registry.getKey().getValue().toString().matches("minecraft:block")){
+                    if(((SimpleRegistry)registry).frozen==false){
+                    Registries.resetTagEntries(registry);
+        			registry.freeze();
+                    }//((SimpleRegistry)registry).tags.putAll(taglist);
+                    ember.qualitycommands.ModRegistries.blocksLoaded=true;
+                }
+            }
+		}
+	}
+    /*public static void bootstrap() {
+		init();
+		freezeRegistries();
+		validate(REGISTRIES);
+	}*/
+
+}
