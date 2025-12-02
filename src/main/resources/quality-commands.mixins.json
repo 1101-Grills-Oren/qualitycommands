@@ -38,7 +38,8 @@
 		"MinecraftServerMixin",
 		"NbtComponentMixin",
 		"LimbAnimatorMixin",
-		"EntityTrackerEntryMixin"
+		"EntityTrackerEntryMixin",
+		"EnderDragonEntityMixin"
 		//"RegistryMixin",
 		//"RegistriesMixin",
 		//"SimpleRegistryMixin",

@@ -242,5 +242,10 @@ public class EntityMixin implements ember.qualitycommands.util.EntityAccessor{
 		this.lastY = this.lastRenderY = pos.y;
 		this.lastZ = this.lastRenderZ = pos.z;
     };
+    @Shadow
+    public void addAirTravelEffects(){};
+    public void runAddAirTravelEffects(){
+        this.addAirTravelEffects();
+    }
 }
 
