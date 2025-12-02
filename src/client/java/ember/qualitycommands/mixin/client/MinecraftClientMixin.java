@@ -51,4 +51,5 @@ public class MinecraftClientMixin implements MinecraftClientAccessor{
     public EntityRenderManager getEntityRenderManager(){
         return this.entityRenderManager;
     }
+	
 }

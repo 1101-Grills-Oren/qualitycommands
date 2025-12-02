@@ -23,20 +23,31 @@ import ember.qualitycommands.packets.CustomEntityDataS2CPacketPayload;
 import ember.qualitycommands.packets.CustomEntityDataS2CPacket;
 import ember.qualitycommands.util.NbtComponentAccessor;
 import ember.qualitycommands.util.EntityAccessor;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.registry.Registries;
+import java.util.ArrayList;
+import ember.qualitycommands.util.EntityAccessor;
+import ember.qualitycommands.util.EnderDragonEntityAccessor;
+import java.util.function.Function;
+import java.util.function.BiFunction;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 /*import ember.qualitycommands.blocks.AbstractColoredRedstoneWireBlock;
 import ember.qualitycommands.blocks.RedRedstoneWireBlock;
 import ember.qualitycommands.blocks.GreenRedstoneWireBlock;
 import ember.qualitycommands.blocks.BlueRedstoneWireBlock;*/
+import net.minecraft.util.Identifier;
 import net.minecraft.block.Blocks;
 @Environment(EnvType.CLIENT)
 public class QualityCommandsClient implements ClientModInitializer{
     /*public void onUpdateCustomData(CustomEntityDataS2CPacket packet) {
-		NetworkThreadUtils.forceMainThread(packet, (ClientPlayNetworkHandler)(Object)this, ((ClientPlayNetworkHandler)(Object)this).client.getPacketApplyBatcher());
-		Entity entity = this.world.getEntityById(packet.getEntityId());
+		NetworkThreadUtils.forceMainThread(packet, (ClientPlayNetworkHandler)(Object)entity, ((ClientPlayNetworkHandler)(Object)entity).client.getPacketApplyBatcher());
+		Entity entity = entity.world.getEntityById(packet.getEntityId());
 		if (entity != null) {
             NbtComponent n=((EntityAccessor)entity).getCustomData();
             for (ember.qualitycommands.packets.CustomEntityDataS2CPacket.Entry entry : packet.getEntries()) {
@@ -70,8 +81,131 @@ public class QualityCommandsClient implements ClientModInitializer{
             QualityCommands.LOGGER.info("Entity null.");
         }
 	}
-    		// In your client-only initializer method
-		
+    public static ArrayList<BiFunction<Entity,Entity,Entity>> visualPatchValues=new ArrayList(0);
+    public static ArrayList<Identifier> visualPatchKeys=new ArrayList(0);
+    public static void addVisualPatch(BiFunction<Entity,Entity,Entity> value,Identifier id){
+        visualPatchKeys.ensureCapacity(visualPatchKeys.size()+1);
+        visualPatchValues.ensureCapacity(visualPatchValues.size()+1);
+        visualPatchKeys.add(id);
+        visualPatchValues.add(value);
+    }
+    static{
+	addVisualPatch((identity,entity)->{
+		if(identity instanceof EnderDragonEntity dragonIdentity){
+                dragonIdentity.yawAcceleration+=MathHelper.wrapDegrees(entity.getYaw()-identity.getYaw())*0.1F;
+            }
+			return identity;
+	},Identifier.of("minecraft:ender_dragon"));
+	/*
+	
+    addVisualPatch((e)->{
+            EnderDragonEntity entity=(EnderDragonEntity)e;
+            ((EntityAccessor)entity).runAddAirTravelEffects();
+		if (entity.getEntityWorld().isClient()) {
+			entity.setHealth(entity.getHealth());
+			if (!entity.isSilent() && !entity.getPhaseManager().getCurrent().isSittingOrHovering() && ((EnderDragonEntityAccessor)entity).setTicksUntilNextGrowl(((EnderDragonEntityAccessor)entity).getTicksUntilNextGrowl()-1) < 0) {
+				entity.getEntityWorld()
+					.playSoundClient(
+						entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ENTITY_ENDER_DRAGON_GROWL, entity.getSoundCategory(), 2.5F, 0.8F + entity.getRandom().nextFloat() * 0.3F, false
+					);
+				((EnderDragonEntityAccessor)entity).setTicksUntilNextGrowl(200 + entity.getRandom().nextInt(200));
+			}
+		}
+
+		/*if (entity.fight == null && entity.getEntityWorld() instanceof ServerWorld serverWorld) {
+			EnderDragonFight enderDragonFight = serverWorld.getEnderDragonFight();
+			if (enderDragonFight != null && entity.getUuid().equals(enderDragonFight.getDragonUuid())) {
+				entity.fight = enderDragonFight;
+			}
+		}*v/
+
+		entity.lastWingPosition = entity.wingPosition;
+		if (entity.isDead()) {
+			float f = (entity.getRandom().nextFloat() - 0.5F) * 8.0F;
+			float g = (entity.getRandom().nextFloat() - 0.5F) * 4.0F;
+			float h = (entity.getRandom().nextFloat() - 0.5F) * 8.0F;
+			entity.getEntityWorld().addParticleClient(ParticleTypes.EXPLOSION, entity.getX() + f, entity.getY() + 2.0 + g, entity.getZ() + h, 0.0, 0.0, 0.0);
+		} else {
+			((EnderDragonEntityAccessor)entity).runTickWithEndCrystals();
+			Vec3d vec3d = entity.getVelocity();
+			float g = 0.2F / ((float)vec3d.horizontalLength() * 10.0F + 1.0F);
+			g *= (float)Math.pow(2.0, vec3d.y);
+			if (entity.getPhaseManager().getCurrent().isSittingOrHovering()) {
+				entity.wingPosition += 0.1F;
+			} else if (entity.slowedDownByBlock) {
+				entity.wingPosition += g * 0.5F;
+			} else {
+				entity.wingPosition += g;
+			}
+
+			entity.setYaw(MathHelper.wrapDegrees(entity.getYaw()));
+        }
+
+
+
+            this.bodyYaw = this.getYaw();
+				Vec3d[] vec3ds = new Vec3d[this.parts.length];
+
+				for (int q = 0; q < this.parts.length; q++) {
+					vec3ds[q] = new Vec3d(this.parts[q].getX(), this.parts[q].getY(), this.parts[q].getZ());
+				}
+
+				float r = (float)(this.frameTracker.getFrame(5).y() - this.frameTracker.getFrame(10).y()) * 10.0F * (float) (Math.PI / 180.0);
+				float s = MathHelper.cos(r);
+				float t = MathHelper.sin(r);
+				float u = this.getYaw() * (float) (Math.PI / 180.0);
+				float v = MathHelper.sin(u);
+				float w = MathHelper.cos(u);
+				this.movePart(this.body, v * 0.5F, 0.0, -w * 0.5F);
+				this.movePart(this.rightWing, w * 4.5F, 2.0, v * 4.5F);
+				this.movePart(this.leftWing, w * -4.5F, 2.0, v * -4.5F);
+				float x = MathHelper.sin(this.getYaw() * (float) (Math.PI / 180.0) - this.yawAcceleration * 0.01F);
+				float y = MathHelper.cos(this.getYaw() * (float) (Math.PI / 180.0) - this.yawAcceleration * 0.01F);
+				float z = this.getHeadVerticalMovement();
+				this.movePart(this.head, x * 6.5F * s, z + t * 6.5F, -y * 6.5F * s);
+				this.movePart(this.neck, x * 5.5F * s, z + t * 5.5F, -y * 5.5F * s);
+				EnderDragonFrameTracker.Frame frame = this.frameTracker.getFrame(5);
+
+				for (int aa = 0; aa < 3; aa++) {
+					EnderDragonPart enderDragonPart = null;
+					if (aa == 0) {
+						enderDragonPart = this.tail1;
+					}
+
+					if (aa == 1) {
+						enderDragonPart = this.tail2;
+					}
+
+					if (aa == 2) {
+						enderDragonPart = this.tail3;
+					}
+
+					EnderDragonFrameTracker.Frame frame2 = this.frameTracker.getFrame(12 + aa * 2);
+					float ab = this.getYaw() * (float) (Math.PI / 180.0) + this.wrapYawChange(frame2.yRot() - frame.yRot()) * (float) (Math.PI / 180.0);
+					float ac = MathHelper.sin(ab);
+					float mx = MathHelper.cos(ab);
+					float n = 1.5F;
+					float o = (aa + 1) * 2.0F;
+					this.movePart(enderDragonPart, -(v * 1.5F + ac * o) * s, frame2.y() - frame.y() - (o + 1.5F) * t + 1.5, (w * 1.5F + mx * o) * s);
+				}
+
+
+				for (int aa = 0; aa < this.parts.length; aa++) {
+					this.parts[aa].lastX = vec3ds[aa].x;
+					this.parts[aa].lastY = vec3ds[aa].y;
+					this.parts[aa].lastZ = vec3ds[aa].z;
+					this.parts[aa].lastRenderX = vec3ds[aa].x;
+					this.parts[aa].lastRenderY = vec3ds[aa].y;
+					this.parts[aa].lastRenderZ = vec3ds[aa].z;
+				}
+
+
+            return entity;
+        },
+        Identifier.of("minecraft:ender_dragon"));*/
+    }
+    // In your client-only initializer method
+    
     /*static float dashSpeed=1;
     public static float getDashSpeed(){
         return QualityCommandsClient.dashSpeed;
@@ -99,15 +233,20 @@ public class QualityCommandsClient implements ClientModInitializer{
     ));*/
     @Override
     public void onInitializeClient(){
+
+
+        
+
+
         ClientPlayNetworking.registerGlobalReceiver(CustomEntityDataS2CPacketPayload.ID, (payload, context) -> {
 			context.client().execute(() -> {
-				this.onUpdateCustomData(payload);
+				onUpdateCustomData(payload);
                 QualityCommands.LOGGER.info("Packet Recieved!");
 			});
 		});
         ClientPlayNetworking.registerGlobalReceiver(CustomEntityStringDataS2CPacketPayload.ID, (payload, context) -> {
 			context.client().execute(() -> {
-				this.onUpdateCustomData(payload);
+				onUpdateCustomData(payload);
                 QualityCommands.LOGGER.info("Packet Recieved!");
 			});
 		});

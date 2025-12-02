@@ -1,5 +1,7 @@
 package ember.qualitycommands.mixin.client;
 
+import net.minecraft.registry.Registries;
+import ember.qualitycommands.QualityCommandsClient;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.util.math.MathHelper;
@@ -30,8 +32,35 @@ import net.minecraft.item.Item;
 import java.util.Set;
 import ember.qualitycommands.ModBlocks;
 import net.minecraft.client.world.ClientWorld;
+import ember.qualitycommands.util.EntityAccessor;
+import ember.qualitycommands.util.EnderDragonEntityAccessor;
+import ember.qualitycommands.util.NbtComponentAccessor;
+import java.util.function.BiFunction;
+import net.minecraft.util.Identifier;
+import ember.qualitycommands.QualityCommands;
 @Mixin(ClientWorld.class)
 public class ClientWorldMixin{
 	@Shadow
     public static Set<Item> BLOCK_MARKER_ITEMS = Set.of(Items.BARRIER, Items.LIGHT,ModBlocks.MAGIC_BARRIER_BLOCK.asItem());
+    
+    @Inject(method = "tickEntity", at = @At("TAIL"))
+	private void tickIdentity(Entity entity,CallbackInfo info) {
+        if(((NbtComponentAccessor)(Object)((EntityAccessor)entity).getCustomData()).getNbt().getString("model_override").isPresent()){
+            if(((NbtComponentAccessor)(Object)((EntityAccessor)entity).getCustomData()).getNbt().getString("model_override").get().length()!=0){
+                if(Registries.ENTITY_TYPE.containsId(Identifier.of(((NbtComponentAccessor)(Object)((EntityAccessor)entity).getCustomData()).getNbt().getString("model_override").get()))){
+                    if(((EntityAccessor)entity).getCurrentIdentity()!=null){
+                    //Sync identity to entity
+                    Identifier id=Identifier.of(((NbtComponentAccessor)(Object)((EntityAccessor)entity).getCustomData()).getNbt().getString("model_override").get());
+                    Entity identity=((EntityAccessor)entity).getCurrentIdentity();
+                    identity.tick();
+                    if(QualityCommandsClient.visualPatchKeys.contains(id)){
+                        BiFunction<Entity,Entity,Entity> patchFunction= QualityCommandsClient.visualPatchValues.get(QualityCommandsClient.visualPatchKeys.indexOf(id));
+                        ((EntityAccessor)entity).setCurrentIdentity(patchFunction.apply(identity,entity));
+                        //QualityCommands.LOGGER.info("visual patch "+id);
+                    }
+                    }
+                }
+            }
+        }
+    }
 }

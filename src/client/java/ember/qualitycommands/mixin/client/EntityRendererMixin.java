@@ -47,6 +47,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PhantomEntity;
 import net.minecraft.client.render.entity.state.EntityHitboxAndView;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 @Mixin(EntityRenderer.class)
 public class EntityRendererMixin<T extends Entity, S extends EntityRenderState>{
     @Inject(method = "getAndUpdateRenderState", at = @At("RETURN"), cancellable = true)
@@ -69,6 +70,11 @@ public class EntityRendererMixin<T extends Entity, S extends EntityRenderState>{
                 ((Entity)entity).getEntityPos().y,
                 ((Entity)entity).getEntityPos().z
             );
+            if(identity instanceof EnderDragonEntity dragonIdentity){
+                identity.setYaw(entity.getYaw()+189);
+            }else{
+                identity.setYaw(entity.getYaw());
+            }
             ((EntityAccessor)identity).setLastPosition(
                 ((Entity)entity).getLastRenderPos()
             );
